@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import Button  from "@/components/ui/Button";
 import { FileText, Download, ChevronsRight, Folder, Users } from "lucide-react";
 
 // Maps machine-readable keys to human-readable labels
