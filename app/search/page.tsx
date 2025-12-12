@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Prisma } from '@prisma/client';
 import { buildAdvancedWhereClause, QueryElement } from "@/lib/search-builder";
+import DiscoverSidebar from "@/components/DiscoverSidebar";
 
 const PAGE_SIZE = 10;
 
@@ -26,7 +27,6 @@ export default async function SearchPage({ searchParams }: { searchParams: { que
     try {
         const queryElements: QueryElement[] = JSON.parse(decodeURIComponent(advancedQuery));
         const advancedWhere = buildAdvancedWhereClause(queryElements);
-        // Merge with the base `status: 'PUBLISHED'` condition
         where.AND = [...(where.AND as any[] || []), ... (advancedWhere.AND || [])];
         description = 'Advanced search results';
         searchUrlParams = `advancedQuery=${advancedQuery}`;
@@ -56,26 +56,16 @@ export default async function SearchPage({ searchParams }: { searchParams: { que
   } else if (query) {
     where.OR = [
       { title: { contains: query, mode: 'insensitive' }},
-      { metadata: { some: { value: { contains: query, mode: 'insensitive' }}}},
+      { metadata: { some: { value: { contains: query, mode: 'insensitive' }}}}, 
     ];
     description = `Found results for "${query}"`;
     searchUrlParams = `query=${encodeURIComponent(query)}`;
   }
 
-  if(advancedQuery || query || startDate) {
-    totalItems = await prisma.item.count({ where });
-    items = await prisma.item.findMany({
-      where,
-      include: {
-        collection: true,
-        metadata: {
-            where: { key: 'dc.description.abstract' },
-            take: 1
-        }
-      }
-    });
-  } else {
-    // If no search parameters, fetch all published items with pagination
+  // Only run the query if there are search terms
+  const performSearch = advancedQuery || query || startDate || facet;
+
+  if (performSearch) {
     totalItems = await prisma.item.count({ where });
     items = await prisma.item.findMany({
       where,
@@ -90,36 +80,63 @@ export default async function SearchPage({ searchParams }: { searchParams: { que
       take: PAGE_SIZE,
       orderBy: { createdAt: 'desc' }
     });
+  } else {
+    // Default view: show latest items if no search is performed
+    totalItems = await prisma.item.count({where: { status: 'PUBLISHED' }});
+    items = await prisma.item.findMany({
+        where: { status: 'PUBLISHED' },
+        include: {
+            collection: true,
+            metadata: { where: { key: 'dc.description.abstract' }, take: 1 }
+        },
+        skip: (currentPage - 1) * PAGE_SIZE,
+        take: PAGE_SIZE,
+        orderBy: { createdAt: 'desc' }
+    });
   }
+
 
   const totalPages = Math.ceil(totalItems / PAGE_SIZE);
   const paginationBaseUrl = `/search?${searchUrlParams}`;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold mb-4">Search Results</h1>
-      <p className="mb-8">{description} ({totalItems} total)</p>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+                <DiscoverSidebar />
+            </div>
+            {/* Main Content */}
+            <div className="lg:col-span-3">
+                <h1 className="text-3xl font-bold mb-4">Search Results</h1>
+                <p className="mb-8 text-gray-600">{description} ({totalItems} total)</p>
 
-      <div className="divide-y divide-gray-200">
-        {items.length > 0 ? items.map((item) => {
-          const abstract = item.metadata[0]?.value || '';
-          return (
-              <div key={item.id} className="py-6">
-                <Link href={`/items/${item.id}`}>
-                  <h3 className="text-xl text-blue-600 hover:underline cursor-pointer font-semibold">{item.title}</h3>
-                </Link>
-                <p className="text-gray-500 text-sm mt-1">In collection: {item.collection.name}</p>
-                {abstract && <p className="text-gray-700 mt-2 line-clamp-2">{abstract}</p>}
-              </div>
-          );
-        }) : (
-          <p className="text-center py-10 text-gray-500">No results found for your criteria.</p>
-        )}
-      </div>
+                <div className="divide-y divide-gray-200">
+                    {items.length > 0 ? items.map((item) => {
+                    const abstract = item.metadata[0]?.value || '';
+                    return (
+                        <div key={item.id} className="py-6">
+                            <Link href={`/items/${item.id}`}>
+                            <h3 className="text-xl text-blue-600 hover:underline cursor-pointer font-semibold">{item.title}</h3>
+                            </Link>
+                            <p className="text-gray-500 text-sm mt-1">In collection: {item.collection.name}</p>
+                            {abstract && <p className="text-gray-700 mt-2 line-clamp-2">{abstract}</p>}
+                        </div>
+                    );
+                    }) : (
+                    <p className="text-center py-10 text-gray-500">No results found for your criteria.</p>
+                    )}
+                </div>
 
-      {totalPages > 1 && (
-        <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl={paginationBaseUrl} />
-      )}
+                {totalPages > 1 && (
+                    <div className="mt-8">
+                        <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl={paginationBaseUrl} />
+                    </div>
+                )}
+            </div>
+
+          
+        </div>
     </div>
   );
 }
