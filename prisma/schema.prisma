@@ -144,6 +144,7 @@ model Bitstream {
   mimeType    String
   size        Int      // Size in bytes
   storageKey  String   // Path to file in storage (e.g., S3 key or local path)
+  downloadCount Int    @default(0) // To track number of downloads
   createdAt   DateTime @default(now())
 
   itemId      String
