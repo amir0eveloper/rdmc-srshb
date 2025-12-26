@@ -24,9 +24,9 @@ async function authorizeSubmitterOrAdmin(session: any, itemId: string) {
   return { authorized: true };
 }
 
-export async function GET(req: Request, { params }: { params: { itemId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
   const session = await auth();
-  const { authorized, error } = await authorizeSubmitterOrAdmin(session, params.itemId);
+  const { authorized, error } = await authorizeSubmitterOrAdmin(session, (await params).itemId);
 
   if (!authorized) {
     return NextResponse.json({ error }, { status: error === "Unauthorized" ? 401 : 403 });
@@ -34,7 +34,7 @@ export async function GET(req: Request, { params }: { params: { itemId: string }
 
   try {
     const item = await prisma.item.findUnique({
-      where: { id: params.itemId },
+      where: { id: (await params).itemId },
       include: { metadata: true, bitstreams: true, collection: true, submitter: true },
     });
 
@@ -49,9 +49,9 @@ export async function GET(req: Request, { params }: { params: { itemId: string }
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { itemId: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
   const session = await auth();
-  const { authorized, error } = await authorizeSubmitterOrAdmin(session, params.itemId);
+  const { authorized, error } = await authorizeSubmitterOrAdmin(session, (await params).itemId);
 
   if (!authorized) {
     return NextResponse.json({ error }, { status: error === "Unauthorized" ? 401 : 403 });
@@ -65,7 +65,7 @@ export async function PUT(req: Request, { params }: { params: { itemId: string }
 
   try {
     const item = await prisma.item.update({
-      where: { id: params.itemId },
+      where: { id: (await params).itemId },
       data: {
         title,
       },

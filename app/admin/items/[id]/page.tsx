@@ -2,9 +2,9 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
-export default async function AdminItemViewPage({ params }: { params: { id: string } }) {
+export default async function AdminItemViewPage({ params }: { params: Promise<{ id: string }> }) {
   const item = await prisma.item.findUnique({
-    where: { id: params.id },
+    where: { id: (await params).id },
     include: { metadata: true, bitstreams: true },
   });
 

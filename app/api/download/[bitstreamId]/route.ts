@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 
-export async function GET(req: Request, { params }: { params: { bitstreamId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ bitstreamId: string }> }) {
   try {
     const bitstream = await prisma.bitstream.findUnique({
-      where: { id: params.bitstreamId },
+      where: { id: (await params).bitstreamId },
     });
 
     if (!bitstream) {
@@ -15,7 +15,7 @@ export async function GET(req: Request, { params }: { params: { bitstreamId: str
 
     const file = await readFile(bitstream.storageKey);
 
-    return new NextResponse(file, {
+    return new NextResponse(file as any, {
       headers: {
         "Content-Disposition": `attachment; filename="${bitstream.name}"`,
         "Content-Type": bitstream.mimeType,

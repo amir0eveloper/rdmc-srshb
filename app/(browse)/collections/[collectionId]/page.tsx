@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
-export default async function CollectionPage({ params }: { params: { collectionId: string } }) {
+export default async function CollectionPage({ params }: { params: Promise<{ collectionId: string }> }) {
   const collection = await prisma.collection.findUnique({
-    where: { id: params.collectionId },
+    where: { id: (await params).collectionId },
     include: {
       items: {
         where: { status: 'PUBLISHED' },

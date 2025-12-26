@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session || !session.user) {
@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   try {
     const bitstreams = await prisma.bitstream.findMany({
-      where: { itemId: params.id },
+      where: { itemId: (await params).id },
     });
 
     return NextResponse.json(bitstreams);
@@ -24,7 +24,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session || !session.user) {
@@ -48,7 +48,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     const newBitstream = await prisma.bitstream.create({
       data: {
-        itemId: params.id,
+        itemId: (await params).id,
         name: file.name,
         mimeType: file.type,
         size: file.size,

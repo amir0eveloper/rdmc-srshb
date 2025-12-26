@@ -25,9 +25,9 @@ async function authorizeSubmitterOrAdmin(session: any, itemId: string) {
   return { authorized: true };
 }
 
-export async function DELETE(req: Request, { params }: { params: { itemId: string, bitstreamId: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ itemId: string, bitstreamId: string }> }) {
   const session = await auth();
-  const { authorized, error } = await authorizeSubmitterOrAdmin(session, params.itemId);
+  const { authorized, error } = await authorizeSubmitterOrAdmin(session, (await params).itemId);
 
   if (!authorized) {
     return NextResponse.json({ error }, { status: error === "Unauthorized" ? 401 : 403 });
@@ -35,7 +35,7 @@ export async function DELETE(req: Request, { params }: { params: { itemId: strin
 
   try {
     const bitstream = await prisma.bitstream.findUnique({
-      where: { id: params.bitstreamId },
+      where: { id: (await params).bitstreamId },
     });
 
     if (!bitstream) {
@@ -47,7 +47,7 @@ export async function DELETE(req: Request, { params }: { params: { itemId: strin
 
     // Delete the bitstream record from the database
     await prisma.bitstream.delete({
-      where: { id: params.bitstreamId },
+      where: { id: (await params).bitstreamId },
     });
 
     return NextResponse.json({ message: "Bitstream deleted successfully" });

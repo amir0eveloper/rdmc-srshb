@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session || session.user.role !== "ADMIN") {
@@ -12,7 +12,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   try {
     const community = await prisma.community.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
     });
 
     if (!community) {
@@ -26,7 +26,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session || session.user.role !== "ADMIN") {
@@ -41,7 +41,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   try {
     const community = await prisma.community.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         name,
         description,
@@ -55,7 +55,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session || session.user.role !== "ADMIN") {
@@ -64,7 +64,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
   try {
     await prisma.community.delete({
-      where: { id: params.id },
+      where: { id: (await params).id },
     });
 
     return NextResponse.json({ message: "Community deleted successfully" });

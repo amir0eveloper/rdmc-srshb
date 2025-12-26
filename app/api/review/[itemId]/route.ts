@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function PUT(req: Request, { params }: { params: { itemId: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
   const session = await auth();
 
   if (!session || session.user.role !== "REVIEWER") {
@@ -18,7 +18,7 @@ export async function PUT(req: Request, { params }: { params: { itemId: string }
 
   try {
     const updatedItem = await prisma.item.update({
-      where: { id: params.itemId },
+      where: { id: (await params).itemId },
       data: {
         status,
       },

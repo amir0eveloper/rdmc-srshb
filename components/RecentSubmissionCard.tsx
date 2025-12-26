@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Eye, Calendar, Download, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import  Button  from '@/components/ui/Button';
 
 const TRUNCATE_LENGTH = 200;
 

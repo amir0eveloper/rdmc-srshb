@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function DELETE(req: Request, { params }: { params: { id: string, metadataId: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string, metadataId: string }> }) {
   const session = await auth();
 
   if (!session || !session.user) {
@@ -12,7 +12,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string, m
 
   try {
     await prisma.metadataField.delete({
-      where: { id: params.metadataId },
+      where: { id: (await params).metadataId },
     });
 
     return NextResponse.json({ message: "Metadata field deleted successfully" });

@@ -26,9 +26,9 @@ async function authorizeSubmitterOrAdmin(session: any, itemId: string) {
   return { authorized: true };
 }
 
-export async function GET(req: Request, { params }: { params: { itemId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
   const session = await auth();
-  const { authorized, error } = await authorizeSubmitterOrAdmin(session, params.itemId);
+  const { authorized, error } = await authorizeSubmitterOrAdmin(session, (await params).itemId);
 
   if (!authorized) {
     return NextResponse.json({ error }, { status: error === "Unauthorized" ? 401 : 403 });
@@ -36,7 +36,7 @@ export async function GET(req: Request, { params }: { params: { itemId: string }
 
   try {
     const bitstreams = await prisma.bitstream.findMany({
-      where: { itemId: params.itemId },
+      where: { itemId: (await params).itemId },
     });
 
     return NextResponse.json(bitstreams);
@@ -46,9 +46,9 @@ export async function GET(req: Request, { params }: { params: { itemId: string }
   }
 }
 
-export async function POST(req: Request, { params }: { params: { itemId: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
   const session = await auth();
-  const { authorized, error } = await authorizeSubmitterOrAdmin(session, params.itemId);
+  const { authorized, error } = await authorizeSubmitterOrAdmin(session, (await params).itemId);
 
   if (!authorized) {
     return NextResponse.json({ error }, { status: error === "Unauthorized" ? 401 : 403 });
@@ -71,7 +71,7 @@ export async function POST(req: Request, { params }: { params: { itemId: string 
 
     const newBitstream = await prisma.bitstream.create({
       data: {
-        itemId: params.itemId,
+        itemId: (await params).itemId,
         name: file.name,
         mimeType: file.type,
         size: file.size,

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { unlink } from "fs/promises";
 
-export async function DELETE(req: Request, { params }: { params: { id: string, bitstreamId: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string, bitstreamId: string }> }) {
   const session = await auth();
 
   if (!session || !session.user) {
@@ -13,7 +13,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string, b
 
   try {
     const bitstream = await prisma.bitstream.findUnique({
-      where: { id: params.bitstreamId },
+      where: { id: (await params).bitstreamId },
     });
 
     if (!bitstream) {
@@ -25,7 +25,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string, b
 
     // Delete the bitstream record from the database
     await prisma.bitstream.delete({
-      where: { id: params.bitstreamId },
+      where: { id: (await params).bitstreamId },
     });
 
     return NextResponse.json({ message: "Bitstream deleted successfully" });

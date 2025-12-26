@@ -24,9 +24,9 @@ async function authorizeSubmitterOrAdmin(session: any, itemId: string) {
   return { authorized: true };
 }
 
-export async function DELETE(req: Request, { params }: { params: { itemId: string, metadataId: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ itemId: string, metadataId: string }> }) {
   const session = await auth();
-  const { authorized, error } = await authorizeSubmitterOrAdmin(session, params.itemId);
+  const { authorized, error } = await authorizeSubmitterOrAdmin(session, (await params).itemId);
 
   if (!authorized) {
     return NextResponse.json({ error }, { status: error === "Unauthorized" ? 401 : 403 });
@@ -34,7 +34,7 @@ export async function DELETE(req: Request, { params }: { params: { itemId: strin
 
   try {
     await prisma.metadataField.delete({
-      where: { id: params.metadataId },
+      where: { id: (await params).metadataId },
     });
 
     return NextResponse.json({ message: "Metadata field deleted successfully" });

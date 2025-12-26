@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }>  }) {
   const session = await auth();
 
   if (!session || !session.user) {
@@ -12,7 +12,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   try {
     const metadata = await prisma.metadataField.findMany({
-      where: { itemId: params.id },
+      where: { itemId: (await params).id },
       orderBy: { key: 'asc' }, // Ensure consistent order
     });
 
@@ -23,7 +23,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   // Ensure user is an admin or a submitter
@@ -40,7 +40,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   try {
     const newMetadata = await prisma.metadataField.create({
       data: {
-        itemId: params.id,
+        itemId: (await params).id,
         key,
         value,
       },
@@ -53,7 +53,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const session = await auth();
 
     // Ensure user is an admin or a submitter

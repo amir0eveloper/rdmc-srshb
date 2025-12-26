@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
+import  Button  from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/Card';
 import { PlusCircle, MinusCircle, Search as SearchIcon } from 'lucide-react';

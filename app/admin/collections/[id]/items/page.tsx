@@ -5,16 +5,16 @@ import Link from "next/link";
 
 const PAGE_SIZE = 10;
 
-export default async function AdminCollectionItemsPage({ params, searchParams }: { params: { id: string }, searchParams: { page?: string } }) {
-  const currentPage = parseInt(searchParams.page || '1', 10);
+export default async function AdminCollectionItemsPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ page?: string }> }) {
+  const currentPage = parseInt((await searchParams).page || '1', 10);
 
   const totalItems = await prisma.item.count({
-    where: { collectionId: params.id },
+    where: { collectionId: (await params).id },
   });
   const totalPages = Math.ceil(totalItems / PAGE_SIZE);
 
   const collection = await prisma.collection.findUnique({
-    where: { id: params.id },
+    where: { id: (await params).id },
     include: {
       items: {
         skip: (currentPage - 1) * PAGE_SIZE,
@@ -31,7 +31,7 @@ export default async function AdminCollectionItemsPage({ params, searchParams }:
     <div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-bold">Items in {collection.name}</h1>
-        <Link href={`/admin/collections/${params.id}/items/new`} className="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-800">New Item</Link>
+        <Link href={`/admin/collections/${(await params).id}/items/new`} className="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-800">New Item</Link>
       </div>
       <div className="bg-white shadow-md rounded-md">
         <table className="min-w-full divide-y divide-gray-200">
@@ -55,7 +55,7 @@ export default async function AdminCollectionItemsPage({ params, searchParams }:
           </tbody>
         </table>
       </div>
-      <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl={`/admin/collections/${params.id}/items`} />
+      <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl={`/admin/collections/${(await params).id}/items`} />
     </div>
   );
 }

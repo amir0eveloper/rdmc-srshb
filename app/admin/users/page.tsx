@@ -5,8 +5,8 @@ import Link from "next/link";
 
 const PAGE_SIZE = 10;
 
-export default async function AdminUsersPage({ searchParams }: { searchParams: { page?: string } }) {
-  const currentPage = parseInt(searchParams.page || '1', 10);
+export default async function AdminUsersPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const currentPage = parseInt((await searchParams).page || '1', 10);
 
   const totalUsers = await prisma.user.count();
   const totalPages = Math.ceil(totalUsers / PAGE_SIZE);

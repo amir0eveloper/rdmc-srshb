@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session || !session.user) {
@@ -12,7 +12,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   try {
     const item = await prisma.item.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: { metadata: true, bitstreams: true },
     });
 
@@ -29,7 +29,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
 import { unlink } from "fs/promises";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session || !session.user) {
@@ -54,7 +54,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
 
     const item = await prisma.item.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: dataToUpdate,
     });
 
@@ -65,7 +65,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session || !session.user) {
@@ -74,7 +74,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
   try {
     const item = await prisma.item.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: { bitstreams: true },
     });
 
@@ -89,9 +89,9 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
     // Delete item and related data from database in a transaction
     await prisma.$transaction([
-      prisma.bitstream.deleteMany({ where: { itemId: params.id } }),
-      prisma.metadataField.deleteMany({ where: { itemId: params.id } }),
-      prisma.item.delete({ where: { id: params.id } }),
+      prisma.bitstream.deleteMany({ where: { itemId: (await params).id } }),
+      prisma.metadataField.deleteMany({ where: { itemId: (await params).id } }),
+      prisma.item.delete({ where: { id: (await params).id } }),
     ]);
 
     return NextResponse.json({ message: "Item deleted successfully" });

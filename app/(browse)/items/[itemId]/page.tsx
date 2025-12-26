@@ -28,10 +28,10 @@ const formatBytes = (bytes: number, decimals = 2) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-export default async function ItemPage({ params }: { params: { itemId: string } }) {
+export default async function ItemPage({ params }: { params: Promise<{ itemId: string }> }) {
   const item = await prisma.item.findUnique({
     where: { 
-        id: params.itemId,
+        id: (await params).itemId,
         status: 'PUBLISHED' 
     },
     include: { 

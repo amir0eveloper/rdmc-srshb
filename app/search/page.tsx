@@ -13,7 +13,7 @@ const FACET_KEY_MAP: { [key: string]: string } = {
     'author': 'dc.contributor.author',
 };
 
-export default async function SearchPage({ searchParams }: { searchParams: { query?: string, facet?: string, page?: string, startDate?: string, endDate?: string, advancedQuery?: string } }) {
+export default async function SearchPage({ searchParams }: { searchParams: Promise<{ query?: string, facet?: string, page?: string, startDate?: string, endDate?: string, advancedQuery?: string }> }) {
   let query: string | undefined;
   let facet: string | undefined;
   let page: string | undefined;
@@ -21,7 +21,9 @@ export default async function SearchPage({ searchParams }: { searchParams: { que
   let endDate: string | undefined;
   let advancedQuery: string | undefined;
 
-  for (const [key, value] of Object.entries(searchParams)) {
+  const resolvedParams = await searchParams;
+
+  for (const [key, value] of Object.entries(resolvedParams)) {
     if (key === 'query') query = value as string;
     else if (key === 'facet') facet = value as string;
     else if (key === 'page') page = value as string;
@@ -43,7 +45,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { que
     try {
         const queryElements: QueryElement[] = JSON.parse(decodeURIComponent(advancedQuery));
         const advancedWhere = buildAdvancedWhereClause(queryElements);
-        where.AND = [...(where.AND as any[] || []), ... (advancedWhere.AND || [])];
+        where.AND = [...(where.AND as any[] || []), ...(advancedWhere.AND as any[] || [])];
         description = 'Advanced search results';
         searchUrlParams = `advancedQuery=${advancedQuery}`;
     } catch(e) {

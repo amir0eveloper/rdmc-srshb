@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
-export default async function CommunityPage({ params }: { params: { communityId: string } }) {
+export default async function CommunityPage({ params }: { params: Promise<{ communityId: string }> }) {
   const community = await prisma.community.findUnique({
-    where: { id: params.communityId },
+    where: { id: (await params).communityId },
     include: { collections: true },
   });
 
