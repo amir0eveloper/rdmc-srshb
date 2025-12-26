@@ -1,38 +1,41 @@
-import { Search, ChevronDown, BarChart3, FileText, Users, Database, ArrowRight, Eye, Calendar, Download, Globe } from 'lucide-react';
-import { prisma } from '@/lib/prisma';
-import Link from 'next/link';
-import RecentSubmissionCard from '@/components/RecentSubmissionCard'; 
-import DiscoverSidebar from '@/components/DiscoverSidebar';
+import { Search, Database, ArrowRight, Globe } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import RecentSubmissionCard from "@/components/RecentSubmissionCard";
+import DiscoverSidebar from "@/components/DiscoverSidebar";
 
-const StatCard = ({ icon: Icon, value, label }: { icon: any; value: string; label: string }) => (
-  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-    <div className="flex items-center gap-4">
-      <div className="p-3 bg-blue-50 rounded-lg">
-        <Icon className="w-6 h-6 text-blue-600" />
-      </div>
-      <div>
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-        <p className="text-gray-600 text-sm">{label}</p>
-      </div>
-    </div>
-  </div>
-);
+interface CollectionWithCount {
+  _count: { items: number };
+}
 
-const CommunityCard = ({ community }: { community: any }) => {
-  const totalItems = community.collections.reduce((acc: number, collection: any) => acc + collection._count.items, 0);
+interface Community {
+  id: string;
+  name: string;
+  description: string | null;
+  collections: CollectionWithCount[];
+}
+
+const CommunityCard = ({ community }: { community: Community }) => {
+  const totalItems = community.collections.reduce(
+    (acc: number, collection: CollectionWithCount) =>
+      acc + collection._count.items,
+    0
+  );
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all duration-300">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="font-semibold text-gray-900 mb-1">{community.name}</h3>
-          <p className="text-gray-600 text-sm line-clamp-2 mb-3">{community.description}</p>
+          <p className="text-gray-600 text-sm line-clamp-2 mb-3">
+            {community.description}
+          </p>
           <div className="flex items-center text-sm text-gray-500">
             <Database className="w-4 h-4 mr-1" />
             <span>{totalItems} datasets</span>
           </div>
         </div>
-        <Link 
+        <Link
           href={`/communities/${community.id}`}
           className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded-full transition-colors"
         >
@@ -46,7 +49,7 @@ const CommunityCard = ({ community }: { community: any }) => {
 export default async function Home() {
   const communities = await prisma.community.findMany({
     take: 6,
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     include: {
       collections: {
         include: {
@@ -60,19 +63,21 @@ export default async function Home() {
 
   const rawRecentItems = await prisma.item.findMany({
     take: 4,
-    where: { status: 'PUBLISHED' },
-    orderBy: { createdAt: 'desc' },
+    where: { status: "PUBLISHED" },
+    orderBy: { createdAt: "desc" },
     include: {
       submitter: true,
       collection: true,
       metadata: {
-        where: { key: 'dc.description.abstract' },
+        where: { key: "dc.description.abstract" },
       },
     },
   });
 
-  const recentItems = rawRecentItems.map(item => {
-    const abstract = item.metadata.find(m => m.key === 'dc.description.abstract')?.value || '';
+  const recentItems = rawRecentItems.map((item) => {
+    const abstract =
+      item.metadata.find((m) => m.key === "dc.description.abstract")?.value ||
+      "";
     return {
       ...item,
       abstract,
@@ -94,9 +99,10 @@ export default async function Home() {
               Welcome to the Somali Regional State Health Bureau Repository
             </h1>
             <p className=" text-blue-100 mb-8 max-w-2xl">
-              At the heart of advancing research and management at Somali Regional State Health Bureau, 
-              the Repository is dedicated to improving outcomes through the efficient collection 
-              and dissemination of knowledge.
+              At the heart of advancing research and management at Somali
+              Regional State Health Bureau, the Repository is dedicated to
+              improving outcomes through the efficient collection and
+              dissemination of knowledge.
             </p>
             {/* Search Section in Hero */}
             <div className="">
@@ -133,10 +139,14 @@ export default async function Home() {
             <section>
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Recent Submissions</h2>
-                  <p className="text-gray-600">Latest research contributions from our community</p>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    Recent Submissions
+                  </h2>
+                  <p className="text-gray-600">
+                    Latest research contributions from our community
+                  </p>
                 </div>
-                <Link 
+                <Link
                   href="/items"
                   className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-2"
                 >
@@ -160,10 +170,14 @@ export default async function Home() {
             <section>
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Communities</h2>
-                  <p className="text-gray-600">Browse the communities in the repository.</p>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    Communities
+                  </h2>
+                  <p className="text-gray-600">
+                    Browse the communities in the repository.
+                  </p>
                 </div>
-                <Link 
+                <Link
                   href="/communities"
                   className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-2"
                 >
@@ -187,4 +201,4 @@ export default async function Home() {
       </div>
     </div>
   );
-}  
+}

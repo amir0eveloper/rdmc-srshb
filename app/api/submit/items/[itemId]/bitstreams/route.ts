@@ -1,11 +1,15 @@
-
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 
-async function authorizeSubmitterOrAdmin(session: any, itemId: string) {
+import { Session } from "next-auth";
+
+async function authorizeSubmitterOrAdmin(
+  session: Session | null,
+  itemId: string
+) {
   if (!session || !session.user || !session.user.id) {
     return { authorized: false, error: "Unauthorized" };
   }
@@ -26,12 +30,23 @@ async function authorizeSubmitterOrAdmin(session: any, itemId: string) {
   return { authorized: true };
 }
 
-export async function GET(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ itemId: string }> }
+) {
   const session = await auth();
-  const { authorized, error } = await authorizeSubmitterOrAdmin(session, (await params).itemId);
+  const { authorized, error } = await authorizeSubmitterOrAdmin(
+    session,
+    (
+      await params
+    ).itemId
+  );
 
   if (!authorized) {
-    return NextResponse.json({ error }, { status: error === "Unauthorized" ? 401 : 403 });
+    return NextResponse.json(
+      { error },
+      { status: error === "Unauthorized" ? 401 : 403 }
+    );
   }
 
   try {
@@ -42,21 +57,35 @@ export async function GET(req: Request, { params }: { params: Promise<{ itemId: 
     return NextResponse.json(bitstreams);
   } catch (error) {
     console.error("Error fetching bitstreams:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }
 
-export async function POST(req: Request, { params }: { params: Promise<{ itemId: string }> }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ itemId: string }> }
+) {
   const session = await auth();
-  const { authorized, error } = await authorizeSubmitterOrAdmin(session, (await params).itemId);
+  const { authorized, error } = await authorizeSubmitterOrAdmin(
+    session,
+    (
+      await params
+    ).itemId
+  );
 
   if (!authorized) {
-    return NextResponse.json({ error }, { status: error === "Unauthorized" ? 401 : 403 });
+    return NextResponse.json(
+      { error },
+      { status: error === "Unauthorized" ? 401 : 403 }
+    );
   }
 
   try {
     const data = await req.formData();
-    const file: File | null = data.get('file') as unknown as File;
+    const file: File | null = data.get("file") as unknown as File;
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -82,6 +111,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ itemId:
     return NextResponse.json(newBitstream, { status: 201 });
   } catch (error) {
     console.error("Error uploading file:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }

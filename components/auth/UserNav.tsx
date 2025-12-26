@@ -23,7 +23,6 @@ const UserNav = () => {
         />
       )}
       <span>{session.user.name}</span>
-      <span>{session.user.name}</span>
       <button onClick={() => signOut({ callbackUrl: "/" })} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Sign Out</button>
     </div>
   );

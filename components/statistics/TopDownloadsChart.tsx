@@ -1,7 +1,15 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useEffect, useState } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 interface TopDownloadData {
   title: string;
@@ -16,14 +24,18 @@ export default function TopDownloadsChart() {
   useEffect(() => {
     async function fetchTopDownloads() {
       try {
-        const response = await fetch('/api/statistics/top-downloads');
+        const response = await fetch("/api/statistics/top-downloads");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const result: TopDownloadData[] = await response.json();
         setData(result);
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setError(e.message);
+        } else {
+          setError("An unknown error occurred");
+        }
         console.error("Failed to fetch top downloads:", e);
       } finally {
         setLoading(false);
@@ -50,7 +62,10 @@ export default function TopDownloadsChart() {
       <BarChart
         data={data}
         margin={{
-          top: 5, right: 30, left: 20, bottom: 5,
+          top: 5,
+          right: 30,
+          left: 20,
+          bottom: 5,
         }}
         layout="vertical"
       >

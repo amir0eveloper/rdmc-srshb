@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 interface SummaryStatsData {
   totalItems: number;
@@ -19,14 +19,18 @@ export default function SummaryStats() {
   useEffect(() => {
     async function fetchSummaryStats() {
       try {
-        const response = await fetch('/api/statistics/summary');
+        const response = await fetch("/api/statistics/summary");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data: SummaryStatsData = await response.json();
         setStats(data);
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setError(e.message);
+        } else {
+          setError("An unknown error occurred");
+        }
         console.error("Failed to fetch summary stats:", e);
       } finally {
         setLoading(false);
@@ -40,24 +44,44 @@ export default function SummaryStats() {
     return (
       <>
         <Card>
-          <CardHeader><CardTitle>Total Items</CardTitle></CardHeader>
-          <CardContent><p>Loading...</p></CardContent>
+          <CardHeader>
+            <CardTitle>Total Items</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Loading...</p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Total Collections</CardTitle></CardHeader>
-          <CardContent><p>Loading...</p></CardContent>
+          <CardHeader>
+            <CardTitle>Total Collections</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Loading...</p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Total Communities</CardTitle></CardHeader>
-          <CardContent><p>Loading...</p></CardContent>
+          <CardHeader>
+            <CardTitle>Total Communities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Loading...</p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Total Downloads</CardTitle></CardHeader>
-          <CardContent><p>Loading...</p></CardContent>
+          <CardHeader>
+            <CardTitle>Total Downloads</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Loading...</p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>New Submissions (This Month)</CardTitle></CardHeader>
-          <CardContent><p>Loading...</p></CardContent>
+          <CardHeader>
+            <CardTitle>New Submissions (This Month)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Loading...</p>
+          </CardContent>
         </Card>
       </>
     );
@@ -74,24 +98,44 @@ export default function SummaryStats() {
   return (
     <>
       <Card>
-        <CardHeader><CardTitle>Total Items</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">{stats.totalItems}</p></CardContent>
+        <CardHeader>
+          <CardTitle>Total Items</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold">{stats.totalItems}</p>
+        </CardContent>
       </Card>
       <Card>
-        <CardHeader><CardTitle>Total Collections</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">{stats.totalCollections}</p></CardContent>
+        <CardHeader>
+          <CardTitle>Total Collections</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold">{stats.totalCollections}</p>
+        </CardContent>
       </Card>
       <Card>
-        <CardHeader><CardTitle>Total Communities</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">{stats.totalCommunities}</p></CardContent>
+        <CardHeader>
+          <CardTitle>Total Communities</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold">{stats.totalCommunities}</p>
+        </CardContent>
       </Card>
       <Card>
-        <CardHeader><CardTitle>Total Downloads</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">{stats.totalDownloads}</p></CardContent>
+        <CardHeader>
+          <CardTitle>Total Downloads</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold">{stats.totalDownloads}</p>
+        </CardContent>
       </Card>
       <Card>
-        <CardHeader><CardTitle>New Submissions (This Month)</CardTitle></CardHeader>
-        <CardContent><p className="text-2xl font-bold">{stats.newSubmissionsThisMonth}</p></CardContent>
+        <CardHeader>
+          <CardTitle>New Submissions (This Month)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold">{stats.newSubmissionsThisMonth}</p>
+        </CardContent>
       </Card>
     </>
   );

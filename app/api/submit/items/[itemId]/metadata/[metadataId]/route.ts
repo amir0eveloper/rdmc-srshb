@@ -1,9 +1,13 @@
-
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-async function authorizeSubmitterOrAdmin(session: any, itemId: string) {
+import { Session } from "next-auth";
+
+async function authorizeSubmitterOrAdmin(
+  session: Session | null,
+  itemId: string
+) {
   if (!session || !session.user || !session.user.id) {
     return { authorized: false, error: "Unauthorized" };
   }
@@ -24,12 +28,23 @@ async function authorizeSubmitterOrAdmin(session: any, itemId: string) {
   return { authorized: true };
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ itemId: string, metadataId: string }> }) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ itemId: string; metadataId: string }> }
+) {
   const session = await auth();
-  const { authorized, error } = await authorizeSubmitterOrAdmin(session, (await params).itemId);
+  const { authorized, error } = await authorizeSubmitterOrAdmin(
+    session,
+    (
+      await params
+    ).itemId
+  );
 
   if (!authorized) {
-    return NextResponse.json({ error }, { status: error === "Unauthorized" ? 401 : 403 });
+    return NextResponse.json(
+      { error },
+      { status: error === "Unauthorized" ? 401 : 403 }
+    );
   }
 
   try {
@@ -37,9 +52,14 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ itemI
       where: { id: (await params).metadataId },
     });
 
-    return NextResponse.json({ message: "Metadata field deleted successfully" });
+    return NextResponse.json({
+      message: "Metadata field deleted successfully",
+    });
   } catch (error) {
     console.error("Error deleting metadata:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }

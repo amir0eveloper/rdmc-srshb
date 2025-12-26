@@ -1,10 +1,14 @@
-
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { unlink } from "fs/promises";
 
-async function authorizeSubmitterOrAdmin(session: any, itemId: string) {
+import { Session } from "next-auth";
+
+async function authorizeSubmitterOrAdmin(
+  session: Session | null,
+  itemId: string
+) {
   if (!session || !session.user || !session.user.id) {
     return { authorized: false, error: "Unauthorized" };
   }
@@ -25,12 +29,23 @@ async function authorizeSubmitterOrAdmin(session: any, itemId: string) {
   return { authorized: true };
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ itemId: string, bitstreamId: string }> }) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ itemId: string; bitstreamId: string }> }
+) {
   const session = await auth();
-  const { authorized, error } = await authorizeSubmitterOrAdmin(session, (await params).itemId);
+  const { authorized, error } = await authorizeSubmitterOrAdmin(
+    session,
+    (
+      await params
+    ).itemId
+  );
 
   if (!authorized) {
-    return NextResponse.json({ error }, { status: error === "Unauthorized" ? 401 : 403 });
+    return NextResponse.json(
+      { error },
+      { status: error === "Unauthorized" ? 401 : 403 }
+    );
   }
 
   try {
@@ -39,7 +54,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ itemI
     });
 
     if (!bitstream) {
-      return NextResponse.json({ error: "Bitstream not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Bitstream not found" },
+        { status: 404 }
+      );
     }
 
     // Delete the file from the filesystem
@@ -53,6 +71,9 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ itemI
     return NextResponse.json({ message: "Bitstream deleted successfully" });
   } catch (error) {
     console.error("Error deleting bitstream:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }

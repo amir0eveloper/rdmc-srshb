@@ -2,26 +2,16 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import {
-  Search,
-  Menu,
-  X,
-  Database,
-  FileText,
-  BarChart3,
-  ChevronDown,
-} from "lucide-react";
+import { Search, Menu, X, Database, FileText, BarChart3 } from "lucide-react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import SignInModal from "../auth/SignInModal";
 import UserNav from "../auth/UserNav";
 import { useRouter } from "next/navigation";
 
-
 const Navbar = () => {
   const { data: session } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDatasetMenuOpen, setIsDatasetMenuOpen] = useState(false);
   const route = useRouter();
 
   const navItems = [
@@ -96,7 +86,10 @@ const Navbar = () => {
             {/* Search and User Actions */}
             <div className="flex items-center space-x-4">
               {/* Search Button - Desktop */}
-              <button onClick={() => route.push('/search')} className="hidden md:flex items-center gap-2 px-4 py-2 ">
+              <button
+                onClick={() => route.push("/search")}
+                className="hidden md:flex items-center gap-2 px-4 py-2 "
+              >
                 <Search size={18} className="text-gray-500" />
               </button>
 

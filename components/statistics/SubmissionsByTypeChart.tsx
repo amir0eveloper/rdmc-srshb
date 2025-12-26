@@ -1,14 +1,32 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useEffect, useState } from "react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
 interface SubmissionTypeData {
   name: string;
   count: number;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#d0ed57', '#a4de6c', '#00C49F'];
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#8884d8",
+  "#82ca9d",
+  "#ffc658",
+  "#d0ed57",
+  "#a4de6c",
+  "#00C49F",
+];
 
 export default function SubmissionsByTypeChart() {
   const [data, setData] = useState<SubmissionTypeData[]>([]);
@@ -18,14 +36,18 @@ export default function SubmissionsByTypeChart() {
   useEffect(() => {
     async function fetchSubmissionsByType() {
       try {
-        const response = await fetch('/api/statistics/submissions-by-type');
+        const response = await fetch("/api/statistics/submissions-by-type");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const result: SubmissionTypeData[] = await response.json();
         setData(result);
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setError(e.message);
+        } else {
+          setError("An unknown error occurred");
+        }
         console.error("Failed to fetch submissions by type:", e);
       } finally {
         setLoading(false);

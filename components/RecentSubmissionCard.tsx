@@ -1,13 +1,21 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Eye, Calendar, Download, FileText } from 'lucide-react';
-import  Button  from '@/components/ui/Button';
+import { useState } from "react";
+import Link from "next/link";
+import { Calendar, FileText } from "lucide-react";
 
 const TRUNCATE_LENGTH = 200;
 
-export default function RecentSubmissionCard({ item }: { item: any }) {
+interface Item {
+  id: string;
+  title: string;
+  createdAt: string | Date;
+  abstract?: string;
+  submitter: { name: string | null };
+  collection: { id: string; name: string };
+}
+
+export default function RecentSubmissionCard({ item }: { item: Item }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const isTruncated = item.abstract && item.abstract.length > TRUNCATE_LENGTH;
@@ -31,7 +39,7 @@ export default function RecentSubmissionCard({ item }: { item: any }) {
               {item.title}
             </h3>
           </Link>
-          
+
           {item.abstract && (
             <p className="text-gray-600 text-sm mb-3">
               {isTruncated && !isExpanded
@@ -41,11 +49,11 @@ export default function RecentSubmissionCard({ item }: { item: any }) {
           )}
 
           {isTruncated && (
-            <button 
+            <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="text-sm font-semibold text-blue-600 hover:text-blue-800 mb-3"
             >
-              {isExpanded ? 'Show Less' : 'Show More'}
+              {isExpanded ? "Show Less" : "Show More"}
             </button>
           )}
 
@@ -53,7 +61,7 @@ export default function RecentSubmissionCard({ item }: { item: any }) {
             <div className="text-sm text-gray-600">
               <span>by {item.submitter.name}</span>
               <span className="mx-2">•</span>
-              <Link 
+              <Link
                 href={`/collections/${item.collection.id}`}
                 className="text-blue-600 hover:underline"
               >

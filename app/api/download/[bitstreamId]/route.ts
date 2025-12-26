@@ -1,9 +1,11 @@
-
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 
-export async function GET(req: Request, { params }: { params: Promise<{ bitstreamId: string }> }) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ bitstreamId: string }> }
+) {
   try {
     const bitstream = await prisma.bitstream.findUnique({
       where: { id: (await params).bitstreamId },
@@ -15,6 +17,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ bitstrea
 
     const file = await readFile(bitstream.storageKey);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new NextResponse(file as any, {
       headers: {
         "Content-Disposition": `attachment; filename="${bitstream.name}"`,
@@ -23,6 +26,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ bitstrea
     });
   } catch (error) {
     console.error("Error downloading file:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }

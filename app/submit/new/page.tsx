@@ -1,19 +1,23 @@
+"use client";
 
-'use client';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+interface Collection {
+  id: string;
+  name: string;
+}
 
 export default function NewSubmissionPage() {
-  const [title, setTitle] = useState('');
-  const [collectionId, setCollectionId] = useState('');
-  const [collections, setCollections] = useState<any[]>([]);
-  const [error, setError] = useState('');
+  const [title, setTitle] = useState("");
+  const [collectionId, setCollectionId] = useState("");
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   useEffect(() => {
     const fetchCollections = async () => {
-      const response = await fetch('/api/collections'); // Assuming a public API to list collections
+      const response = await fetch("/api/collections"); // Assuming a public API to list collections
       if (response.ok) {
         const data = await response.json();
         setCollections(data);
@@ -21,7 +25,7 @@ export default function NewSubmissionPage() {
           setCollectionId(data[0].id);
         }
       } else {
-        setError('Failed to fetch collections');
+        setError("Failed to fetch collections");
       }
     };
     fetchCollections();
@@ -29,17 +33,17 @@ export default function NewSubmissionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!title || !collectionId) {
-      setError('Title and Collection are required');
+      setError("Title and Collection are required");
       return;
     }
 
-    const response = await fetch('/api/admin/items', {
-      method: 'POST',
+    const response = await fetch("/api/admin/items", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ title, collectionId }),
     });
@@ -49,14 +53,17 @@ export default function NewSubmissionPage() {
       router.push(`/submit/${item.id}/edit`);
     } else {
       const data = await response.json();
-      setError(data.error || 'Something went wrong');
+      setError(data.error || "Something went wrong");
     }
   };
 
   return (
     <div>
       <h1 className="text-3xl font-bold mb-4">New Submission</h1>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-md shadow-md">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-md shadow-md"
+      >
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <div className="mb-4">
           <label className="block text-gray-700">Title</label>
@@ -83,7 +90,10 @@ export default function NewSubmissionPage() {
             ))}
           </select>
         </div>
-        <button type="submit" className="w-full bg-gray-700 text-white py-2 rounded-md hover:bg-gray-800">
+        <button
+          type="submit"
+          className="w-full bg-gray-700 text-white py-2 rounded-md hover:bg-gray-800"
+        >
           Create Submission
         </button>
       </form>

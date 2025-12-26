@@ -1,4 +1,3 @@
-
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -17,7 +16,7 @@ export default async function CommunitiesPage() {
       },
     },
     orderBy: {
-      name: 'asc',
+      name: "asc",
     },
   });
 
@@ -30,11 +29,13 @@ export default async function CommunitiesPage() {
           <Link href={`/communities/${community.id}`} key={community.id}>
             <Card className="h-full hover:shadow-lg transition-shadow">
               <CardHeader>
-                <CardTitle className="text-blue-600">{community.name}</CardTitle>
+                <CardTitle className="text-blue-600">
+                  {community.name}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700 line-clamp-3 mb-4">
-                  {community.description || 'No description available.'}
+                  {community.description || "No description available."}
                 </p>
                 <div className="text-sm font-semibold">
                   <p>{community._count.subCommunities} sub-communities</p>

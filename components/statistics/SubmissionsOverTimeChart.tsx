@@ -1,7 +1,15 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useEffect, useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 interface SubmissionOverTimeData {
   month: string; // YYYY-MM
@@ -16,14 +24,18 @@ export default function SubmissionsOverTimeChart() {
   useEffect(() => {
     async function fetchSubmissionsOverTime() {
       try {
-        const response = await fetch('/api/statistics/submissions-over-time');
+        const response = await fetch("/api/statistics/submissions-over-time");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const result: SubmissionOverTimeData[] = await response.json();
         setData(result);
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setError(e.message);
+        } else {
+          setError("An unknown error occurred");
+        }
         console.error("Failed to fetch submissions over time:", e);
       } finally {
         setLoading(false);
@@ -50,14 +62,22 @@ export default function SubmissionsOverTimeChart() {
       <LineChart
         data={data}
         margin={{
-          top: 5, right: 30, left: 20, bottom: 5,
+          top: 5,
+          right: 30,
+          left: 20,
+          bottom: 5,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="month" />
         <YAxis />
         <Tooltip />
-        <Line type="monotone" dataKey="count" stroke="#8884d8" activeDot={{ r: 8 }} />
+        <Line
+          type="monotone"
+          dataKey="count"
+          stroke="#8884d8"
+          activeDot={{ r: 8 }}
+        />
       </LineChart>
     </ResponsiveContainer>
   );

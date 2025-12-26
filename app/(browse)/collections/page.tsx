@@ -1,4 +1,3 @@
-
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -14,7 +13,7 @@ export default async function CollectionsPage() {
       },
     },
     orderBy: {
-      name: 'asc',
+      name: "asc",
     },
   });
 
@@ -27,14 +26,16 @@ export default async function CollectionsPage() {
           <Link href={`/collections/${collection.id}`} key={collection.id}>
             <Card className="h-full hover:shadow-lg transition-shadow">
               <CardHeader>
-                <CardTitle className="text-blue-600">{collection.name}</CardTitle>
+                <CardTitle className="text-blue-600">
+                  {collection.name}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-500 text-sm mb-2">
                   In community: {collection.community.name}
                 </p>
                 <p className="text-gray-700 line-clamp-3 mb-4">
-                  {collection.description || 'No description available.'}
+                  {collection.description || "No description available."}
                 </p>
                 <p className="text-sm font-semibold">
                   {collection._count.items} item(s)

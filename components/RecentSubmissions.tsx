@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Button from '@/components/ui/Button';
+import { useState, useEffect } from "react";
+import Button from "@/components/ui/Button";
 
 interface RecentItem {
   id: string;
@@ -20,14 +20,18 @@ export default function RecentSubmissions() {
   useEffect(() => {
     const fetchRecentItems = async () => {
       try {
-        const response = await fetch('/api/items/recent');
+        const response = await fetch("/api/items/recent");
         if (!response.ok) {
-          throw new Error('Failed to fetch recent submissions.');
+          throw new Error("Failed to fetch recent submissions.");
         }
         const data = await response.json();
         setItems(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred");
+        }
       } finally {
         setLoading(false);
       }
@@ -37,7 +41,7 @@ export default function RecentSubmissions() {
   }, []);
 
   const toggleExpanded = (itemId: string) => {
-    setExpandedItems(prev => {
+    setExpandedItems((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(itemId)) {
         newSet.delete(itemId);
@@ -57,20 +61,29 @@ export default function RecentSubmissions() {
   }
 
   if (items.length === 0) {
-    return <div className="text-center p-8 text-gray-500">No recent submissions found.</div>;
+    return (
+      <div className="text-center p-8 text-gray-500">
+        No recent submissions found.
+      </div>
+    );
   }
 
   return (
     <div className="space-y-8">
       <h2 className="text-3xl font-bold text-center">Recent Submissions</h2>
       <div className="space-y-6 max-w-4xl mx-auto">
-        {items.map(item => {
+        {items.map((item) => {
           const isExpanded = expandedItems.has(item.id);
           const isTruncated = item.abstract.length > TRUNCATE_LENGTH;
 
           return (
-            <div key={item.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">{item.title}</h3>
+            <div
+              key={item.id}
+              className="bg-white p-6 rounded-lg shadow-md border border-gray-200"
+            >
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                {item.title}
+              </h3>
               {item.abstract && (
                 <p className="text-gray-600">
                   {isTruncated && !isExpanded
@@ -79,11 +92,11 @@ export default function RecentSubmissions() {
                 </p>
               )}
               {isTruncated && (
-                <Button 
+                <Button
                   onClick={() => toggleExpanded(item.id)}
                   className="text-sm mt-4 bg-transparent text-blue-600 hover:bg-blue-50 px-2 py-1"
                 >
-                  {isExpanded ? 'Show Less' : 'Show More'}
+                  {isExpanded ? "Show Less" : "Show More"}
                 </Button>
               )}
             </div>
