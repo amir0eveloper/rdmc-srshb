@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // /lib/auth.ts
-import NextAuth, { type NextAuthConfig } from "next-auth";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "./prisma";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Role } from "@prisma/client";
+import { authConfig } from "./auth.config";
 
 // Helper function to fetch user by username
 export const getUserWithUsername = async (username: string) => {
@@ -20,7 +21,6 @@ export const getUserWithUsername = async (username: string) => {
   }
 };
 
-// Extend NextAuth types to include custom user properties
 declare module "next-auth" {
   interface User {
     username?: string | null;
@@ -38,8 +38,8 @@ declare module "next-auth" {
   }
 }
 
-export const config = {
-  trustHost: true,
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -71,33 +71,4 @@ export const config = {
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        (token as any).id = user.id;
-        (token as any).role = user.role;
-        (token as any).username = user.username;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = (token as any).id;
-        session.user.role = (token as any).role;
-        session.user.username = (token as any).username;
-      }
-      return session;
-    },
-  },
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 60, // 30 minutes
-    updateAge: 15 * 60, // refresh token every 15 mins if user is active
-  },
-  pages: {
-    signIn: "/signin",
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-} satisfies NextAuthConfig;
-
-export const { handlers, auth, signIn, signOut } = NextAuth(config);
+});
