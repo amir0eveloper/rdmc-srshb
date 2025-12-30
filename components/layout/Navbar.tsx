@@ -16,16 +16,10 @@ const Navbar = () => {
 
   const navItems = [
     {
-      label: "Dataset Communities",
+      label: "Communities & Collections",
       href: "/communities",
       icon: Database,
       description: "Browse by research groups",
-    },
-    {
-      label: "All Datasets",
-      href: "/datasets",
-      icon: FileText,
-      description: "Complete repository collection",
     },
     {
       label: "Statistics",
