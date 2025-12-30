@@ -32,7 +32,7 @@ const CommunityCard = ({ community }: { community: Community }) => {
           </p>
           <div className="flex items-center text-sm text-gray-500">
             <Database className="w-4 h-4 mr-1" />
-            <span>{totalItems} datasets</span>
+            <span>{totalItems} collections</span>
           </div>
         </div>
         <Link
